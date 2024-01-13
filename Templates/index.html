@@ -1,0 +1,87 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Decryptor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* Add some styles for the popup */
+        .popup {
+            display: none;
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px 0px #000000;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <h1>PDF Decryptor</h1>
+    <form id="decryptForm" action="/decrypt" method="post" enctype="multipart/form-data" onsubmit="submitForm(event)">
+        <label for="file">Select a PDF file:</label>
+        <input type="file" name="file" accept=".pdf" required>
+        <br>
+        <label for="password">Password (press Enter if none):</label>
+        <input type="text" name="password">
+        <br>
+        <button type="submit" id="decryptButton">Decrypt PDF</button><hr>
+        <button type="button" onclick="resetForm()">Reset</button>
+    </form>
+    <div id="popup" class="popup">
+        <p class="popup-content" id="popupContent"></p>
+    </div>
+    <script>
+        function submitForm(event) {
+            // Prevent the default form submission
+            event.preventDefault();
+
+            var form = document.getElementById("decryptForm");
+            var formData = new FormData(form);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/decrypt", true);
+            xhr.responseType = "blob";
+
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    var filename = form.querySelector('input[type="file"]').files[0].name.replace('.pdf', '_unlocked.pdf');
+                    var blob = new Blob([xhr.response], { type: "application/pdf" });
+                    var link = document.createElement("a");
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    // Show success message and reset form
+                    document.getElementById("popupContent").innerHTML = "PDF successfully decrypted!";
+                    document.getElementById("popup").style.display = "block";
+                    setTimeout(function () {
+                        document.getElementById("popup").style.display = "none";
+                    }, 2000); // Set timeout for 2 seconds
+                    resetForm();
+                } else {
+                    var popup = document.getElementById("popup");
+                    var popupContent = document.getElementById("popupContent");
+                    popupContent.innerHTML = "Error: " + xhr.responseText;
+                    popup.style.display = "block";
+                }
+            };
+
+            xhr.send(formData);
+        }
+
+        function resetForm() {
+            document.getElementById('decryptForm').reset();
+        }
+    </script>
+</body>
+</html>
