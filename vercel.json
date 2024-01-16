@@ -2,18 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "app/app.py",
+      "src": "api/app.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
-      "src": "/Templates/(.*)",
-      "dest": "/app/Templates/index.html"
-    },
-    {
       "src": "/(.*)",
-      "dest": "/app/app.py"
+      "dest": "/api/app.py"
     }
   ],
   "env": {
