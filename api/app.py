@@ -4,7 +4,7 @@ import io
 import os
 import pikepdf
 from pathlib import Path
-app = Flask(_name_, template_folder="Templates")
+app = Flask(__name__, template_folder="Templates")
 
 ALLOWED_EXTENSIONS = {'pdf'}
 
