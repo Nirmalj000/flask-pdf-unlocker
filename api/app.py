@@ -4,7 +4,7 @@ import os
 from flask import Flask, render_template, request, send_file
 import PyPDF2, pikepdf
 
-app = Flask(__name__, template_folder="Templates")
+app = Flask(_name_, template_folder="Templates")
 
 ALLOWED_EXTENSIONS = {'pdf'}
 
@@ -94,5 +94,5 @@ def encrypt():
         if os.path.exists(input_path):
             os.remove(input_path)
 
-if __name__ == '__main__':
+if _name_ == '__main__':
     app.run(debug=True)
