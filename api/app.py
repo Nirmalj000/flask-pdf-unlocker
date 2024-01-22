@@ -65,7 +65,7 @@ def encrypt():
         return render_template('index.html', error_message='Please select a valid PDF file.')
 
     # Specify the directory for temporary files
-    temp_dir = 'temp'
+    temp_dir = 'tmp'
 
     # Ensure the temporary directory exists
     os.makedirs(temp_dir, exist_ok=True)
