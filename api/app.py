@@ -69,8 +69,8 @@ def encrypt():
 
     # Ensure the temporary directory exists
     os.makedirs(temp_dir, exist_ok=True)
+    input_path = f'{temp_dir}/{secure_filename(uploaded_file.filename)}'
 
-    input_path = os.path.join(temp_dir, 'input.pdf')
 
     try:
         # Save the uploaded file temporarily
