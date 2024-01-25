@@ -1,4 +1,3 @@
 Flask
 pikepdf
 Werkzeug
-PyPDF2
