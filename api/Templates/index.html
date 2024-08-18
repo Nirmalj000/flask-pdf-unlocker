@@ -21,6 +21,14 @@
             box-shadow: 0px 0px 10px 0px #000000;
             z-index: 1;
         }
+        .popup.error {
+    background-color: #dc3545; /* Red background for error */
+}
+
+.popup.success {
+    background-color: #28a745; /* Green background for success */
+}
+
     </style>
 </head>
 <body>
@@ -40,44 +48,71 @@
     </div>
     <script>
         function submitForm(event) {
-            // Prevent the default form submission
-            event.preventDefault();
+    // Prevent the default form submission
+    event.preventDefault();
 
-            var form = document.getElementById("decryptForm");
-            var formData = new FormData(form);
+    var form = document.getElementById("decryptForm");
+    var formData = new FormData(form);
 
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "/decrypt", true);
-            xhr.responseType = "blob";
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/decrypt", true);
+    xhr.responseType = "blob"; // Default to blob for PDF responses
 
-            xhr.onload = function () {
-                if (xhr.status === 200) {
-                    var filename = form.querySelector('input[type="file"]').files[0].name.replace('.pdf', '_unlocked.pdf');
-                    var blob = new Blob([xhr.response], { type: "application/pdf" });
-                    var link = document.createElement("a");
-                    link.href = window.URL.createObjectURL(blob);
-                    link.download = filename;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            // Handle successful decryption
+            var filename = form.querySelector('input[type="file"]').files[0].name.replace('.pdf', '_unlocked.pdf');
+            var blob = xhr.response;
+            var link = document.createElement("a");
+            link.href = window.URL.createObjectURL(blob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
 
-                    // Show success message and reset form
-                    document.getElementById("popupContent").innerHTML = "PDF successfully decrypted!";
-                    document.getElementById("popup").style.display = "block";
-                    setTimeout(function () {
-                        document.getElementById("popup").style.display = "none";
-                    }, 2000); // Set timeout for 2 seconds
-                    resetForm();
-                } else {
-                    var popup = document.getElementById("popup");
-                    var popupContent = document.getElementById("popupContent");
-                    popupContent.innerHTML = "Error: " + xhr.responseText;
-                    popup.style.display = "block";
-                }
+            // Show success message and reset form
+            document.getElementById("popupContent").innerHTML = "PDF successfully decrypted!";
+            document.getElementById("popup").classList.add("success");
+            document.getElementById("popup").style.display = "block";
+            setTimeout(function () {
+                document.getElementById("popup").style.display = "none";
+                document.getElementById("popup").classList.remove("success");
+            }, 2000); // Set timeout for 2 seconds
+            resetForm();
+        } else {
+            // Handle error by reading the blob and converting to text
+            var reader = new FileReader();
+            reader.onload = function () {
+                var errorResponse = JSON.parse(reader.result);  // Parse the JSON response
+                var popup = document.getElementById("popup");
+                var popupContent = document.getElementById("popupContent");
+                popupContent.innerHTML = errorResponse.error;  // Display the error message
+                popup.classList.add("error"); // Add error styling
+                popup.style.display = "block";
+                setTimeout(function () {
+                    popup.style.display = "none";
+                    popup.classList.remove("error");
+                }, 4000); // Show error popup for 4 seconds
             };
-
-            xhr.send(formData);
+            reader.readAsText(xhr.response);  // Convert blob to text and read it
         }
+    };
+
+    xhr.onerror = function () {
+        // Handle any other errors, such as network issues
+        var popup = document.getElementById("popup");
+        var popupContent = document.getElementById("popupContent");
+        popupContent.innerHTML = "An error occurred during the request. Please try again.";
+        popup.classList.add("error");
+        popup.style.display = "block";
+        setTimeout(function () {
+            popup.style.display = "none";
+            popup.classList.remove("error");
+        }, 4000);
+    };
+
+    xhr.send(formData);
+}
 
         function resetForm() {
             document.getElementById('decryptForm').reset();
